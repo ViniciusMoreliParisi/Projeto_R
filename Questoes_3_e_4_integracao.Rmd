@@ -1,0 +1,444 @@
+
+
+```{r auxiliar-tabelas-q34, include=FALSE}
+# Função auxiliar para apresentar tabelas no PDF.
+# Na execução manual dos chunks, apresenta os dados no Console.
+exibir_tabela_q34 <- function(dados, ...) {
+  em_relatorio <- isTRUE(getOption("knitr.in.progress"))
+
+  if (em_relatorio && requireNamespace("knitr", quietly = TRUE)) {
+    argumentos <- list(...)
+    if (is.null(argumentos$format)) {
+      argumentos$format <- "latex"
+    }
+    return(do.call(knitr::kable, c(list(x = dados), argumentos)))
+  }
+
+  print(dados, row.names = FALSE)
+  invisible(dados)
+}
+```
+
+```{r preparar-variaveis-q34, include=FALSE}
+# A base funcionarios deve ter sido criada na Questão 1.
+if (!exists("funcionarios")) {
+  stop("O objeto 'funcionarios' não foi encontrado. Execute primeiro a preparação dos dados da Questão 1.")
+}
+
+colunas_necessarias <- c("salario", "grau_instrucao", "estado_civil")
+colunas_ausentes <- setdiff(colunas_necessarias, names(funcionarios))
+
+if (length(colunas_ausentes) > 0) {
+  stop(paste(
+    "Faltam no data.frame 'funcionarios' as seguintes colunas:",
+    paste(colunas_ausentes, collapse = ", ")
+  ))
+}
+
+# Seleção das variáveis utilizadas nas Questões 3 e 4.
+salario <- funcionarios$salario
+grau_instrucao <- funcionarios$grau_instrucao
+estado_civil <- funcionarios$estado_civil
+```
+
+# Questão 3 — Distribuição de frequências dos salários
+
+Nesta questão, os salários dos funcionários são organizados em uma distribuição de frequências agrupada em classes. O agrupamento facilita a visualização da concentração dos salários, embora deixe de apresentar o valor individual de cada funcionário.
+
+## 3(a) Salário mínimo, máximo e amplitude total
+
+A amplitude total é calculada pela diferença entre o maior e o menor salário observado:
+
+\[
+A = X_{\max} - X_{\min}
+\]
+
+```{r q3a}
+# Número de observações, menor salário e maior salário
+n_salarios <- length(salario)
+salario_minimo <- min(salario)
+salario_maximo <- max(salario)
+
+# Amplitude total
+amplitude_total <- salario_maximo - salario_minimo
+
+resumo_salarios <- data.frame(
+  Observacoes = n_salarios,
+  Salario_minimo = salario_minimo,
+  Salario_maximo = salario_maximo,
+  Amplitude_total = amplitude_total
+)
+
+exibir_tabela_q34(
+  resumo_salarios,
+  caption = "Resumo dos valores extremos dos salários",
+  digits = 2,
+  booktabs = TRUE,
+  col.names = c(
+    "\\shortstack{Nº de\\\\observações}",
+    "\\shortstack{Salário\\\\mínimo}",
+    "\\shortstack{Salário\\\\máximo}",
+    "\\shortstack{Amplitude\\\\total}"
+  ),
+  escape = FALSE,
+  format.args = list(decimal.mark = ",", big.mark = ".")
+)
+```
+
+**Interpretação:** O menor salário observado é de 4,00 salários mínimos e o maior é de 23,30 salários mínimos. Portanto, a amplitude total é de 19,30 salários mínimos. Isso significa que a diferença entre os dois valores extremos da distribuição é de 19,30 salários mínimos.
+
+## 3(b) Construção da distribuição agrupada em classes
+
+Para determinar o número de classes, será utilizada a regra de Sturges como critério de referência:
+
+\[
+k = 1 + 3,3\log_{10}(n)
+\]
+
+Com 36 observações, o resultado é aproximadamente 6,13. Adotam-se, portanto, 6 classes. A amplitude teórica é calculada dividindo a amplitude total pelo número de classes. Para facilitar a leitura dos intervalos, será utilizada amplitude de classe igual a 3,5 salários mínimos.
+
+```{r q3b}
+# Número de classes pela regra de Sturges
+numero_classes <- round(1 + 3.3 * log10(n_salarios))
+
+# Amplitude teórica de cada classe
+amplitude_calculada <- amplitude_total / numero_classes
+
+# Amplitude adotada para facilitar a construção dos intervalos
+largura_classe <- 3.5
+
+# Limites das classes
+limites_classes <- seq(
+  from = salario_minimo,
+  by = largura_classe,
+  length.out = numero_classes + 1
+)
+
+# Rótulos dos intervalos, reutilizados na tabela da Questão 3(c)
+rotulos_classes <- c(
+  "[4,0; 7,5)",
+  "[7,5; 11,0)",
+  "[11,0; 14,5)",
+  "[14,5; 18,0)",
+  "[18,0; 21,5)",
+  "[21,5; 25,0]"
+)
+
+resumo_classes <- data.frame(
+  Numero_de_classes = numero_classes,
+  Amplitude_total = amplitude_total,
+  Amplitude_calculada = amplitude_calculada,
+  Amplitude_adotada = largura_classe
+)
+
+exibir_tabela_q34(
+  resumo_classes,
+  caption = "Critérios utilizados para a construção das classes",
+  digits = 2,
+  booktabs = TRUE,
+  col.names = c(
+    "\\shortstack{Nº de\\\\classes}",
+    "\\shortstack{Amplitude\\\\total}",
+    "\\shortstack{Amplitude\\\\teórica}",
+    "\\shortstack{Amplitude\\\\adotada}"
+  ),
+  escape = FALSE,
+  format.args = list(decimal.mark = ",", big.mark = ".")
+)
+
+# Apresentação numerada dos intervalos de classe
+intervalos_classes <- data.frame(
+  Classe = 1:numero_classes,
+  Intervalo = rotulos_classes
+)
+
+exibir_tabela_q34(
+  intervalos_classes,
+  caption = "Intervalos adotados para a distribuição dos salários",
+  booktabs = TRUE,
+  col.names = c("Classe", "Intervalo")
+)
+```
+
+Os intervalos adotados são: [4,0; 7,5), [7,5; 11,0), [11,0; 14,5), [14,5; 18,0), [18,0; 21,5) e [21,5; 25,0]. Os intervalos são fechados à esquerda e abertos à direita, com inclusão do limite superior no último intervalo.
+
+**Justificativa:** A regra de Sturges indicou aproximadamente seis classes. A amplitude teórica obtida foi de 3,22 salários mínimos. Adotou-se 3,5 para obter limites simples e intervalos de mesma largura, mantendo todos os salários observados dentro da distribuição.
+
+## 3(c) Limites, pontos médios e frequências
+
+O ponto médio de cada classe é calculado pela média entre seu limite inferior e seu limite superior. As frequências relativas são obtidas dividindo a frequência absoluta pelo total de funcionários e multiplicando por 100. As frequências acumuladas são calculadas com `cumsum()`.
+
+```{r q3c}
+# Classificação dos salários nos intervalos
+# cut() é um recurso complementar para separar automaticamente os valores
+classe_salario <- cut(
+  salario,
+  breaks = limites_classes,
+  right = FALSE,
+  include.lowest = TRUE,
+  labels = rotulos_classes
+)
+
+# Frequência absoluta e relativa
+frequencia_absoluta <- as.vector(table(classe_salario))
+frequencia_relativa <- frequencia_absoluta / sum(frequencia_absoluta) * 100
+
+# Frequências acumuladas
+frequencia_acumulada <- cumsum(frequencia_absoluta)
+frequencia_relativa_acumulada <- cumsum(frequencia_relativa)
+
+# Limites inferiores, superiores e pontos médios
+limite_inferior <- limites_classes[1:numero_classes]
+limite_superior <- limites_classes[2:(numero_classes + 1)]
+ponto_medio <- (limite_inferior + limite_superior) / 2
+
+# Construção da tabela de distribuição de frequências
+tabela_salarios <- data.frame(
+  Classe = rotulos_classes,
+  Limite_inferior = limite_inferior,
+  Limite_superior = limite_superior,
+  Ponto_medio = ponto_medio,
+  Frequencia_absoluta = frequencia_absoluta,
+  Frequencia_relativa_percentual = round(frequencia_relativa, 2),
+  Frequencia_acumulada = frequencia_acumulada,
+  Frequencia_relativa_acumulada_percentual = round(frequencia_relativa_acumulada, 2)
+)
+
+# Abreviando os títulos para facilitar a leitura da tabela no PDF
+names(tabela_salarios) <- c(
+  "Classe", "Lim. inf.", "Lim. sup.", "Ponto médio",
+  "fi", "fr (%)", "Fi", "Fr acum. (%)"
+)
+
+exibir_tabela_q34(
+  tabela_salarios,
+  caption = "Distribuição de frequências dos salários dos funcionários",
+  digits = 2,
+  booktabs = TRUE,
+  format.args = list(decimal.mark = ",", big.mark = ".")
+)
+```
+
+**Interpretação:** A segunda classe, que compreende salários de 7,5 a menos de 11 salários mínimos, apresenta a maior frequência, com 11 funcionários (30,56%). As duas primeiras classes concentram 20 funcionários, correspondendo a 55,56% do total. A frequência relativa acumulada mostra que 75% dos funcionários recebem menos de 14,5 salários mínimos.
+
+## 3(d) Proporção de funcionários nas duas primeiras classes
+
+A proporção é calculada somando as frequências absolutas das duas primeiras classes e dividindo o resultado pelo total de funcionários:
+
+\[
+P = \frac{f_1 + f_2}{n}\times 100
+\]
+
+```{r q3d}
+funcionarios_duas_classes <- sum(frequencia_absoluta[1:2])
+proporcao_duas_classes <- funcionarios_duas_classes / n_salarios * 100
+
+resultado_duas_classes <- data.frame(
+  Funcionarios_nas_duas_primeiras_classes = funcionarios_duas_classes,
+  Total_de_funcionarios = n_salarios,
+  Proporcao_percentual = proporcao_duas_classes
+)
+
+exibir_tabela_q34(
+  resultado_duas_classes,
+  caption = "Funcionários nas duas primeiras classes salariais",
+  digits = 2,
+  booktabs = TRUE,
+  format.args = list(decimal.mark = ",", big.mark = ".")
+)
+```
+
+**Interpretação:** As duas primeiras classes reúnem 20 dos 36 funcionários, ou seja, aproximadamente 55,56% do conjunto analisado. Portanto, mais da metade dos funcionários recebe menos de 11 salários mínimos.
+
+## 3(e) Informações preservadas e perdidas pelo agrupamento
+
+O agrupamento preserva informações gerais sobre a distribuição, como a quantidade e a proporção de funcionários em cada faixa salarial. Também facilita a identificação das classes com maior concentração de observações e permite examinar frequências acumuladas.
+
+Por outro lado, o agrupamento faz perder parte dos detalhes dos dados originais. Depois de organizados em classes, não é possível identificar, apenas pela tabela agrupada, o salário exato de cada funcionário nem as diferenças entre salários que pertencem ao mesmo intervalo. Assim, o agrupamento facilita a visão geral, mas reduz o detalhamento individual.
+
+# Questão 4 — Representações gráficas
+
+Nesta questão, são apresentados gráficos para as variáveis grau de instrução, estado civil e salário. As funções utilizadas são `barplot()`, `pie()`, `hist()` e `boxplot()`.
+
+## 4(a) Gráfico de barras para grau de instrução
+
+O gráfico de barras é adequado para comparar as frequências das categorias de uma variável qualitativa. Primeiro, calcula-se a frequência de cada categoria com `table()`.
+
+```{r q4a}
+# Frequências por grau de instrução
+frequencia_instrucao <- table(grau_instrucao)
+
+# Tabela auxiliar com frequências absolutas e relativas
+tabela_instrucao <- data.frame(
+  Grau_de_instrucao = names(frequencia_instrucao),
+  Frequencia = as.vector(frequencia_instrucao),
+  Porcentagem = as.vector(prop.table(frequencia_instrucao) * 100)
+)
+
+exibir_tabela_q34(
+  tabela_instrucao,
+  caption = "Funcionários por grau de instrução",
+  digits = 2,
+  booktabs = TRUE,
+  format.args = list(decimal.mark = ",", big.mark = ".")
+)
+
+# Gráfico de barras
+barplot(
+  frequencia_instrucao,
+  names.arg = names(frequencia_instrucao),
+  col = "lightblue",
+  main = "Distribuição dos Funcionários por Grau de Instrução",
+  xlab = "Grau de instrução",
+  ylab = "Frequência absoluta"
+)
+```
+
+**Interpretação:** O grupo com ensino médio é o mais numeroso, reunindo 18 funcionários (50%). O ensino fundamental aparece em seguida, com 12 funcionários (33,33%). O ensino superior corresponde a 6 funcionários (16,67%). Portanto, há predominância de funcionários com grau de instrução médio.
+
+## 4(b) Gráfico de setores para estado civil
+
+O gráfico de setores apresenta a participação de cada categoria em relação ao total. As porcentagens são calculadas com `prop.table()`, multiplicadas por 100.
+
+```{r q4b}
+# Frequências absolutas por estado civil
+frequencia_estado <- table(estado_civil)
+
+# Porcentagens e rótulos do gráfico
+porcentagem_estado <- round(100 * prop.table(frequencia_estado), 2)
+rotulos_estado <- paste0(
+  names(frequencia_estado),
+  " (",
+  format(porcentagem_estado, decimal.mark = ",", nsmall = 2),
+  "%)"
+)
+
+# Tabela de frequências
+tabela_estado <- data.frame(
+  Estado_civil = names(frequencia_estado),
+  Frequencia = as.vector(frequencia_estado),
+  Porcentagem = as.vector(porcentagem_estado)
+)
+
+exibir_tabela_q34(
+  tabela_estado,
+  caption = "Funcionários por estado civil",
+  digits = 2,
+  booktabs = TRUE,
+  format.args = list(decimal.mark = ",", big.mark = ".")
+)
+
+# Gráfico de setores
+pie(
+  frequencia_estado,
+  labels = rotulos_estado,
+  main = "Distribuição dos Funcionários por Estado Civil",
+  col = c("lightblue", "pink")
+)
+```
+
+**Interpretação:** Entre os 36 funcionários, 20 são casados (55,56%) e 16 são solteiros (44,44%). A composição é relativamente equilibrada, embora haja maior participação de funcionários casados.
+
+## 4(c) Histograma dos salários com as classes da Questão 3
+
+O histograma representa a distribuição de uma variável quantitativa por intervalos de classe.
+
+```{r q4c}
+# Histograma utilizando os limites definidos na Questão 3
+hist(
+  salario,
+  breaks = limites_classes,
+  right = FALSE,
+  include.lowest = TRUE,
+  freq = TRUE,
+  main = "Distribuição dos Salários dos Funcionários",
+  xlab = "Salário (em salários mínimos)",
+  ylab = "Frequência absoluta",
+  col = "lightgreen"
+)
+```
+
+**Interpretação:** O histograma confirma a distribuição apresentada na tabela da Questão 3. A classe de 7,5 a menos de 11 salários mínimos apresenta a maior frequência, com 11 funcionários. Observa-se concentração nas duas primeiras classes e redução das frequências nas classes salariais mais altas. Apenas três funcionários recebem 18 salários mínimos ou mais.
+
+## 4(d) Boxplot dos salários
+
+O boxplot resume a distribuição dos salários por meio dos quartis, da mediana e dos valores extremos não considerados discrepantes. Pontos isolados, quando presentes, indicam possíveis observações discrepantes.
+
+```{r q4d}
+# Mediana dos salários, para auxiliar a leitura do boxplot
+mediana_salario <- median(salario)
+mediana_salario
+
+# Boxplot dos salários
+boxplot(
+  salario,
+  horizontal = TRUE,
+  main = "Boxplot dos Salários dos Funcionários",
+  xlab = "Salário (em salários mínimos)",
+  col = "salmon"
+)
+```
+
+**Interpretação:** A mediana dos salários é de 10,165 salários mínimos. Isso significa que metade dos funcionários apresenta salários até esse valor e metade apresenta salários a partir dele. O boxplot evidencia dispersão entre os salários, que variam de 4,00 a 23,30 salários mínimos. Não são identificados pontos isolados além dos limites dos bigodes no boxplot geral. A extensão maior da parte superior sugere maior espalhamento dos salários acima da mediana.
+
+## 4(e) Boxplots comparativos dos salários por grau de instrução
+
+O boxplot comparativo permite observar a distribuição dos salários em cada categoria de grau de instrução, facilitando a comparação das medianas e da dispersão.
+
+```{r q4e}
+# Separação dos funcionários por grau de instrução,
+# utilizando filtragem lógica, como nos exemplos de aula
+funcionarios_fundamental <- funcionarios[funcionarios$grau_instrucao == "fundamental", ]
+funcionarios_medio <- funcionarios[funcionarios$grau_instrucao == "médio", ]
+funcionarios_superior <- funcionarios[funcionarios$grau_instrucao == "superior", ]
+
+# Medianas para apoiar a leitura comparativa das linhas centrais
+medianas_instrucao <- data.frame(
+  Grau_de_instrucao = c("Fundamental", "Médio", "Superior"),
+  Mediana_salarial = c(
+    median(funcionarios_fundamental$salario),
+    median(funcionarios_medio$salario),
+    median(funcionarios_superior$salario)
+  )
+)
+
+exibir_tabela_q34(
+  medianas_instrucao,
+  caption = "Medianas salariais por grau de instrução — apoio à leitura dos boxplots",
+  digits = 3,
+  booktabs = TRUE,
+  format.args = list(decimal.mark = ",", big.mark = ".")
+)
+
+# Boxplots comparativos
+boxplot(
+  salario ~ grau_instrucao,
+  data = funcionarios,
+  horizontal = TRUE,
+  main = "Distribuição dos Salários por Grau de Instrução",
+  xlab = "Salário (em salários mínimos)",
+  ylab = "Grau de instrução",
+  col = c("lightblue", "lightgreen", "pink")
+)
+```
+
+**Interpretação:** As medianas salariais aumentam entre as categorias observadas: 7,125 salários mínimos no grupo com ensino fundamental, 10,910 no grupo com ensino médio e 16,740 no grupo com ensino superior. Assim, o boxplot mostra que o grupo com ensino superior apresenta a maior mediana salarial. Também há dispersão dentro de cada grupo e sobreposição entre as distribuições. Essas comparações são descritivas e não permitem afirmar que o grau de instrução, isoladamente, causa as diferenças salariais observadas.
+
+## Diferença entre gráfico de barras e histograma
+
+O gráfico de barras é utilizado para comparar categorias de uma variável qualitativa. As barras são separadas porque representam categorias distintas, como os níveis de grau de instrução.
+
+O histograma é utilizado para representar uma variável quantitativa agrupada em intervalos. As barras ficam encostadas porque os intervalos representam partes consecutivas de uma escala numérica. Nesta atividade, o gráfico de barras representa o grau de instrução e o histograma representa os salários.
+
+# Observações sobre os procedimentos utilizados
+
+Foram priorizados os procedimentos apresentados no material de aula, como `data.frame()`, `table()`, `prop.table()`, `sum()`, `cumsum()`, `length()`, `min()`, `max()`, `median()`, `barplot()`, `pie()`, `hist()` e `boxplot()`.
+
+Também foram utilizados alguns recursos complementares, identificados aqui para transparência:
+
+- `cut()`: classifica automaticamente cada salário no intervalo correspondente;
+- `seq()`: cria os limites igualmente espaçados das classes;
+- regra de Sturges: critério complementar para justificar o número de classes;
+- `exibir_tabela_q34()`: organiza a apresentação das tabelas no relatório. Esse recurso é apenas de apresentação; os cálculos são feitos com funções do R base.
+
+

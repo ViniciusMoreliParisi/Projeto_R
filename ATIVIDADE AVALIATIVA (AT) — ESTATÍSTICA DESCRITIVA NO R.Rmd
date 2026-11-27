@@ -1,0 +1,431 @@
+---
+title: "Análise Exploratória de Dados"
+author: "Caio Lucas, Emanuel Henrique, Fabio Morais, Haniel Gomes, Rafael Braun, Vinícius Moreli"
+date: "27/11/2026"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+```
+
+# Questão 1
+
+### a) Importe o arquivo, apresente o comando utilizado e exiba as seis primeiras observações.
+
+```{R}
+dados <- read.table("Projeto_R/Dados/dados-bussab.txt", header = TRUE, stringsAsFactors = FALSE)
+head(dados, 6)
+```
+
+### b) Identifique o número de observações e de variáveis.
+
+```{r q1-b}
+dim(dados)
+cat("Observações:", nrow(dados), "| Variáveis:", ncol(dados))
+```
+
+### c) Atribua nomes adequados às variáveis e classifique cada uma quanto à natureza estatística. Trate o número do funcionário como identificador.
+
+```{r q1-c}
+# Ajuste a ordem dos nomes conforme as colunas do seu arquivo
+colnames(dados) <- c("id", "estado_civil", "grau_instrucao", "n_filhos", "salario", "idade_anos", "idade_meses", "regiao")
+names(dados)
+```
+
+- **Classificação estatística:**
+  - `id`: Identificador (não entra como variável de análise).
+  - `estado_civil`: Qualitativa nominal.
+  - `grau_instrucao`: Qualitativa ordinal.
+  - `n_filhos`: Quantitativa discreta.
+  - `salario`: Quantitativa contínua.
+  - `idade_anos` e `idade_meses`: Quantitativas discretas (que compõem a idade contínua).
+  - `regiao`: Qualitativa nominal.
+
+### d) Verifique a estrutura do banco e indique eventuais conversões necessárias para fatores.
+
+```{r q1-d}
+str(dados)
+
+# Conversão das variáveis qualitativas para fator
+dados$estado_civil <- factor(dados$estado_civil)
+dados$grau_instrucao <- factor(dados$grau_instrucao, 
+                               levels = c("ensino fundamental", "ensino médio", "superior"), 
+                               ordered = TRUE)
+dados$regiao <- factor(dados$regiao)
+
+str(dados)
+```
+
+### e) Explique as colunas de anos e meses de idade e crie uma variável que represente a idade em anos, com parte fracionária.
+
+```{r q1-e}
+dados$idade_total <- dados$idade_anos + (dados$idade_meses / 12)
+head(dados[, c("idade_anos", "idade_meses", "idade_total")])
+```
+
+- **Explicação:** A idade completa do funcionário foi dividida em anos inteiros e meses excedentes (0 a 11). Para obter a idade fracionária, somam-se os anos aos meses divididos por 12.
+
+------------------------------------------------------------------------
+
+# Questão 2
+
+### a) Para Estado civil, Grau de instrução e Região de procedência, construa tabelas de frequências absolutas e relativas.
+
+```{r q2-a}
+# Estado Civil
+tab_ec_abs <- table(dados$estado_civil)
+tab_ec_rel <- prop.table(tab_ec_abs)
+cbind(Absoluta = tab_ec_abs, Relativa = round(tab_ec_rel, 4))
+
+# Grau de Instrução
+tab_gi_abs <- table(dados$grau_instrucao)
+tab_gi_rel <- prop.table(tab_gi_abs)
+cbind(Absoluta = tab_gi_abs, Relativa = round(tab_gi_rel, 4))
+
+# Região de Procedência
+tab_reg_abs <- table(dados$regiao)
+tab_reg_rel <- prop.table(tab_reg_abs)
+cbind(Absoluta = tab_reg_abs, Relativa = round(tab_reg_rel, 4))
+```
+
+### b) Apresente as frequências relativas em porcentagem.
+
+```{r q2-b}
+cbind(Absoluta = tab_ec_abs, Porcentagem = round(tab_ec_rel * 100, 2))
+cbind(Absoluta = tab_gi_abs, Porcentagem = round(tab_gi_rel * 100, 2))
+cbind(Absoluta = tab_reg_abs, Porcentagem = round(tab_reg_rel * 100, 2))
+```
+
+### c) Identifique a categoria modal de cada variável.
+
+```{r q2-c}
+cat("Moda Estado Civil:", names(which.max(tab_ec_abs)), "\n")
+cat("Moda Grau de Instrução:", names(which.max(tab_gi_abs)), "\n")
+cat("Moda Região:", names(which.max(tab_reg_abs)), "\n")
+```
+
+### d) Para número de filhos, construa tabela com frequências absolutas, relativas e acumuladas. Comente se frequências acumuladas fazem sentido para todas as variáveis desta questão.
+
+```{r q2-d}
+# Nota: table() ignora NAs por padrão (funcionários solteiros sem registro de filhos)
+tab_filhos <- table(dados$n_filhos)
+freq_rel_f <- prop.table(tab_filhos)
+freq_acum_abs <- cumsum(tab_filhos)
+freq_acum_rel <- cumsum(freq_rel_f)
+
+cbind(
+  Absoluta = tab_filhos,
+  Relativa_Pct = round(freq_rel_f * 100, 2),
+  Acum_Abs = freq_acum_abs,
+  Acum_Pct = round(freq_acum_rel * 100, 2)
+)
+```
+
+- **Comentário:** Frequências acumuladas só fazem sentido para variáveis que possuem **ordem natural** (quantitativas como `n_filhos` ou qualitativas ordinais como `grau_instrucao`). Não fazem sentido para variáveis nominais (`estado_civil` e `regiao`).
+
+### e) Interprete brevemente a composição dos funcionários.
+
+*(Escreva aqui sua interpretação com base nos percentuais obtidos acima: perfil predominante de estado civil, escolaridade, origem geográfica e número de filhos).*
+
+------------------------------------------------------------------------
+
+# Questão 3
+
+### a) Para Salário (em salários mínimos), determine mínimo, máximo e amplitude total.
+
+```{r q3-a}
+min_sal <- min(dados$salario)
+max_sal <- max(dados$salario)
+amp_total <- max_sal - min_sal
+
+cat("Mínimo:", min_sal, "| Máximo:", max_sal, "| Amplitude Total:", amp_total)
+```
+
+### b) Construa distribuição agrupada em classes e justifique o número de classes e a amplitude escolhidos.
+
+```{r q3-b}
+# Regra de Sturges como referência: 1 + 3.322 * log10(36) ≈ 6.17 -> 5 ou 6 classes
+# Exemplo com 5 classes de amplitude 4 (de 4 a 24)
+quebras <- seq(4, 24, by = 4)
+classes_sal <- cut(dados$salario, breaks = quebras, right = FALSE)
+```
+
+- **Justificativa:** Utilizando a regra de Sturges ($k \approx 1 + 3,322 \log_{10}(36) \approx 6$), optou-se por 5 (ou 6) classes de amplitude igual a 4 salários mínimos para cobrir toda a amplitude total de forma simétrica e fácil de interpretar.
+
+### c) Apresente limites, pontos médios, frequências absolutas, relativas e acumuladas.
+
+```{r q3-c}
+freq_abs_c <- table(classes_sal)
+freq_rel_c <- prop.table(freq_abs_c)
+pontos_medios <- (quebras[-length(quebras)] + quebras[-1]) / 2
+
+tabela_classes <- data.frame(
+  Classe = names(freq_abs_c),
+  Ponto_Medio = pontos_medios,
+  Freq_Abs = as.numeric(freq_abs_c),
+  Freq_Rel_Pct = round(as.numeric(freq_rel_c) * 100, 2),
+  Freq_Acum_Abs = cumsum(as.numeric(freq_abs_c)),
+  Freq_Acum_Pct = round(cumsum(as.numeric(freq_rel_c)) * 100, 2)
+)
+tabela_classes
+```
+
+### d) Determine a proporção de funcionários nas duas primeiras classes.
+
+```{r q3-d}
+prop_duas_primeiras <- sum(freq_rel_c[1:2])
+cat("Proporção nas duas primeiras classes:", round(prop_duas_primeiras, 4), 
+    "ou", round(prop_duas_primeiras * 100, 2), "%")
+```
+
+### e) Explique as informações preservadas e perdidas pelo agrupamento.
+
+- **Preservadas:** A visão geral da distribuição, concentração dos dados, assimetria e faixas predominantes.
+- **Perdidas:** Os valores exatos de cada funcionário individualmente (assume-se que os dados se distribuem uniformemente ou se concentram no ponto médio da classe).
+
+------------------------------------------------------------------------
+
+# Questão 4
+
+### a) Gráfico de barras para Grau de instrução.
+
+```{r q4-a}
+barplot(tab_gi_abs, 
+        main = "Distribuição por Grau de Instrução",
+        xlab = "Grau de Instrução", 
+        ylab = "Frequência Absoluta",
+        col = "steelblue")
+```
+
+### b) Gráfico de setores para Estado civil.
+
+```{r q4-b}
+pct_ec <- round(tab_ec_rel * 100, 1)
+labels_ec <- paste0(names(tab_ec_abs), " (", pct_ec, "%)")
+
+pie(tab_ec_abs, 
+    labels = labels_ec,
+    main = "Proporção por Estado Civil",
+    col = c("lightblue", "salmon"))
+```
+
+### c) Histograma de Salário, com as classes da Questão 3.
+
+```{r q4-c}
+hist(dados$salario, 
+     breaks = quebras, 
+     right = FALSE,
+     main = "Histograma de Salários",
+     xlab = "Salário (em salários mínimos)", 
+     ylab = "Frequência Absoluta",
+     col = "darkseagreen3",
+     border = "white")
+```
+
+### d) Boxplot de Salário.
+
+```{r q4-d}
+boxplot(dados$salario, 
+        main = "Boxplot de Salário",
+        ylab = "Salário (em salários mínimos)",
+        col = "gold")
+```
+
+### e) Boxplots comparativos de Salário por Grau de instrução.
+
+```{r q4-e}
+boxplot(salario ~ grau_instrucao, data = dados,
+        main = "Salário por Grau de Instrução",
+        xlab = "Grau de Instrução",
+        ylab = "Salário (em salários mínimos)",
+        col = c("lightgray", "skyblue", "royalblue"))
+```
+
+- **Interpretação e diferença:** O **gráfico de barras** é usado para variáveis qualitativas ou discretas, possuindo espaços entre as barras para indicar categorias distintas. O **histograma** é usado para variáveis quantitativas contínuas agrupadas em intervalos, por isso suas barras são justapostas (coladas), representando a continuidade da escala numérica.
+
+------------------------------------------------------------------------
+
+# Questão 5
+
+### a) Para Salário, calcule média aritmética, mediana e moda, caso exista.
+
+```{r q5-a}
+media_sal <- mean(dados$salario)
+mediana_sal <- median(dados$salario)
+
+# Função para verificar moda em dados contínuos
+freq_sal <- table(dados$salario)
+moda_sal <- names(freq_sal)[freq_sal == max(freq_sal)]
+
+cat("Média:", round(media_sal, 2), "\n")
+cat("Mediana:", mediana_sal, "\n")
+if(max(freq_sal) == 1) {
+  cat("Moda: Amodal (não há valores repetidos)\n")
+} else {
+  cat("Moda:", paste(moda_sal, collapse = ", "), "\n")
+}
+```
+
+### b) Determine Q1, Q3, P10 e P90; informe o método utilizado para calcular os quantis.
+
+```{r q5-b}
+# No R, o padrão da função quantile() é o método type = 7
+quantis <- quantile(dados$salario, probs = c(0.10, 0.25, 0.75, 0.90), type = 7)
+quantis
+```
+
+- **Método utilizado:** Foi utilizado o algoritmo padrão do R (`type = 7`), baseado em interpolação linear das estatísticas de ordem.
+
+### c) Calcule o ponto médio entre o menor e o maior salário.
+
+```{r q5-c}
+ponto_medio_extremos <- (min_sal + max_sal) / 2
+ponto_medio_extremos
+```
+
+### d) Usando a tabela da Questão 3, calcule a média ponderada com pontos médios das classes e frequências absolutas como pesos.
+
+```{r q5-d}
+media_agrupada <- weighted.mean(tabela_classes$Ponto_Medio, tabela_classes$Freq_Abs)
+media_agrupada
+```
+
+### e) Compare a média ponderada agrupada à média dos dados originais e explique possíveis diferenças.
+
+\`\`\`{r q5-e} cat("Média Original:", round(media_sal, 4), "\| Média Agrupada:", round(media_agrupada, 4),
+
+- **Explicação:** A pequena diferença ocorre porque o cálculo agrupado substitui os valores individuais exatos pelo ponto médio de cada intervalo, introduzindo um leve erro de agrupamento.
+
+### f) Discuta se a média representa adequadamente o salário típico, considerando também a mediana.
+
+*(Compare os valores de média e mediana: se forem próximos, a distribuição é relativamente simétrica e ambos representam bem o centro; se a média for puxada para cima por salários altos, a mediana representa melhor o salário típico).*
+
+------------------------------------------------------------------------
+
+# Questão 6
+
+### a) Para Salário, calcule amplitude, variância amostral, desvio-padrão amostral e coeficiente de variação.
+
+```{R}
+var_sal <- var(dados$salario)
+dp_sal <- sd(dados$salario)
+cv_sal <- (dp_sal / media_sal) * 100
+
+cat("Amplitude:", amp_total, "\n")
+cat("Variância Amostral:", round(var_sal, 4), "\n")
+cat("Desvio-Padrão Amostral:", round(dp_sal, 4), "\n")
+cat("Coeficiente de Variação (%):", round(cv_sal, 2), "%\n")
+
+```
+
+b)  Calcule o intervalo interquartílico.
+
+```{r q6-b}
+iiq_sal <- IQR(dados$salario)
+iiq_sal
+```
+
+c)  Identifique possíveis outliers pelo critério de 1,5 vez o intervalo interquartílico.
+
+```{r q6-c}
+q1 <- quantile(dados$salario, 0.25)
+q3 <- quantile(dados$salario, 0.75)
+
+lim_inf <- q1 - 1.5 * iiq_sal
+lim_sup <- q3 + 1.5 * iiq_sal
+
+outliers <- dados$salario[dados$salario < lim_inf | dados$salario > lim_sup]
+
+cat("Limite Inferior:", lim_inf, "| Limite Superior:", lim_sup, "\n")
+cat("Outliers encontrados:", ifelse(length(outliers) == 0, "Nenhum", outliers))
+```
+
+d)  Compare com o boxplot da Questão 4.
+
+(Comente se os pontos plotados além das cercas/hastes no boxplot da Questão 4d coincidem exatamente com o resultado numérico do item 6c).
+
+e)  Interprete a variabilidade salarial.
+
+(Avalie o Coeficiente de Variação: valores acima de 30% geralmente indicam dispersão alta/heterogeneidade nos salários da empresa).
+
+Questão 7
+
+a)  Calcule o escore Z de cada salário, usando média e desvio-padrão amostral.
+
+```{r q7 - b}
+{r q7-a}
+z_sal <- (dados$salario - media_sal) / dp_sal
+round(z_sal, 2)
+```
+
+b)  Acrescente uma coluna com os escores ao data.frame.
+
+```{r q7-b}
+dados$escore_z <- z_sal
+head(dados[, c("id", "salario", "escore_z")])
+Use o código com cuidado.
+```
+
+c)  Identifique os funcionários com maior e menor Z.
+
+```{r q7-c}
+dados[which.max(dados$escore_z), c("id", "salario", "escore_z")]
+dados[which.min(dados$escore_z), c("id", "salario", "escore_z")]
+Use o código com cuidado.
+```
+
+d)  Conte quantos funcionários têm Z \> 1 e Z \< -1.
+
+```{r q7-d}
+acima_1 <- sum(dados$escore_z > 1)
+abaixo_menos_1 <- sum(dados$escore_z < -1)
+
+cat("Funcionários com Z > 1:", acima_1, "\n")
+cat("Funcionários com Z < -1:", abaixo_menos_1, "\n")
+Use o código com cuidado.
+```
+
+e)  Interprete os valores positivos, negativos e nulos.
+
+• Positivos ($Z > 0$): Funcionários que ganham acima da média da empresa (medido em unidades de desvio-padrão). • Negativos ($Z < 0$): Funcionários que ganham abaixo da média. • Nulos ($Z = 0$): Funcionários cujo salário é exatamente igual à média geral.
+
+Questão 8
+
+a)  Calcule média, mediana e desvio-padrão amostral dos salários por grau de instrução.
+
+```{r q8-a}
+medias_gi <- tapply(dados$salario, dados$grau_instrucao, mean)
+medianas_gi <- tapply(dados$salario, dados$grau_instrucao, median)
+dps_gi <- tapply(dados$salario, dados$grau_instrucao, sd)
+Use o código com cuidado.
+```
+
+b)  Organize os resultados em tabela comparativa.
+
+```{r q8-b}
+tabela_q8 <- data.frame(
+  Grau_Instrucao = names(medias_gi),
+  Media = round(as.numeric(medias_gi), 2),
+  Mediana = round(as.numeric(medianas_gi), 2),
+  Desvio_Padrao = round(as.numeric(dps_gi), 2)
+)
+tabela_q8
+Use o código com cuidado.
+```
+
+c)  Identifique o grupo com maior média e aquele com maior dispersão absoluta.
+
+```{r q8-c}
+cat("Maior média:", tabela_q8$Grau_Instrucao[which.max(tabela_q8$Media)], "\n")
+cat("Maior dispersão absoluta (Desvio-Padrão):", tabela_q8$Grau_Instrucao[which.max(tabela_q8$Desvio_Padrao)], "\n")
+Use o código com cuidado.
+```
+
+d)  Compare as medidas e os boxplots da Questão 4.
+
+(Relacione a subida das medianas e o aumento da altura das caixas nos boxplots da Questão 4e com o crescimento das médias e dos desvios-padrão na tabela acima conforme aumenta a escolaridade).
+
+e)  Conclusão
+
+(Escreva aqui seu texto de 10 a 15 linhas sintetizando que maiores níveis de escolaridade estão associados a faixas salariais mais elevadas e maior heterogeneidade interna, destacando como o RH pode usar esse diagnóstico para planos de carreira e equidade salarial — lembrando sempre que análises descritivas apontam associações, mas não provam relação de causa e efeito isolada, pois fatores como tempo de casa e cargo não foram controlados).

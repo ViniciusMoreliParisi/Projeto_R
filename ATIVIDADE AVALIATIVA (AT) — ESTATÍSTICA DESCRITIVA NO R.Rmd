@@ -1,0 +1,211 @@
+---
+title: "Análise Exploratória de Dados"
+author: "Seu Nome"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: cosmo
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE, message = FALSE)
+
+Questão 1
+
+a) Importe o arquivo, apresente o comando utilizado e exiba as seis primeiras observações.
+
+
+
+b) Identifique o número de observações e de variáveis.
+
+
+
+c) Atribua nomes adequados às variáveis e classifique cada uma quanto à natureza estatística. Trate o
+
+número do funcionário como identificador.
+
+
+
+d) Verifique a estrutura do banco e indique eventuais conversões necessárias para fatores.
+
+
+
+e) Explique as colunas de anos e meses de idade e crie uma variável que represente a idade em anos, com
+
+parte fracionária.
+
+
+
+Questão 2
+
+
+
+a) Para Estado civil, Grau de instrução e Região de procedência, construa tabelas de frequências absolutas e
+
+relativas.
+
+
+
+b) Apresente as frequências relativas em porcentagem.
+
+
+
+c) Identifique a categoria modal de cada variável.
+
+
+
+d) Para número de filhos, construa tabela com frequências absolutas, relativas e acumuladas. Comente se
+
+frequências acumuladas fazem sentido para todas as variáveis desta questão.
+
+
+
+e) Interprete brevemente a composição dos funcionários.
+
+
+
+Questão 3
+
+a) Para Salário (em salários mínimos), determine mínimo, máximo e amplitude total.
+
+
+
+b) Construa distribuição agrupada em classes e justifique o número de classes e a amplitude escolhidos.
+
+
+
+c) Apresente limites, pontos médios, frequências absolutas, relativas e acumuladas.
+
+
+
+d) Determine a proporção de funcionários nas duas primeiras classes.
+
+
+
+e) Explique as informações preservadas e perdidas pelo agrupamento.
+
+
+
+Questão 4
+
+a) Gráfico de barras para Grau de instrução.
+
+
+
+b) Gráfico de setores para Estado civil.
+
+
+
+c) Histograma de Salário, com as classes da Questão 3.
+
+
+
+d) Boxplot de Salário.
+
+
+
+e) Boxplots comparativos de Salário por Grau de instrução.
+
+
+
+Apresente títulos, eixos e categorias adequados. Interprete os gráficos e explique a diferença entre barras e
+
+histograma.
+
+
+
+Questão 5
+
+a) Para Salário, calcule média aritmética, mediana e moda, caso exista.
+
+
+
+b) Determine Q1, Q3, P10 e P90; informe o método utilizado para calcular os quantis.
+
+
+
+c) Calcule o ponto médio entre o menor e o maior salário.
+
+
+
+d) Usando a tabela da Questão 3, calcule a média ponderada com pontos médios das classes e frequências
+
+absolutas como pesos.
+
+
+
+e) Compare a média ponderada agrupada à média dos dados originais e explique possíveis diferenças.
+
+
+
+f) Discuta se a média representa adequadamente o salário típico, considerando também a mediana.
+
+
+
+Questão 6
+
+a) Para Salário, calcule amplitude, variância amostral, desvio-padrão amostral e coeficiente de variação.
+
+
+
+b) Calcule o intervalo interquartílico.
+
+
+
+c) Identifique possíveis outliers pelo critério de 1,5 vez o intervalo interquartílico.
+
+
+
+d) Compare com o boxplot da Questão 4.
+
+
+
+e) Interprete a variabilidade salarial.
+
+
+
+Questão 7
+
+a) Calcule o escore Z de cada salário, usando média e desvio-padrão amostral.
+
+
+
+b) Acrescente uma coluna com os escores ao data.frame.
+
+
+
+c) Identifique os funcionários com maior e menor Z.
+
+
+
+d) Conte quantos funcionários têm Z > 1 e Z < -1.
+
+
+
+e) Interprete os valores positivos, negativos e nulos.
+
+
+
+Questão 8
+
+a) Calcule média, mediana e desvio-padrão amostral dos salários por grau de instrução.
+
+
+
+b) Organize os resultados em tabela comparativa.
+
+
+
+c) Identifique o grupo com maior média e aquele com maior dispersão absoluta.
+
+
+
+d) Compare as medidas e os boxplots da Questão 4.
+
+
+
+e) Escreva conclusão de 10 a 15 linhas sobre resultados e implicações possíveis para a gestão de pessoas,
+
+sem inferir causalidade a partir das comparações descritivas.

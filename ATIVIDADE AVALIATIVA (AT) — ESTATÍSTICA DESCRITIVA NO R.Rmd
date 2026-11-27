@@ -15,7 +15,7 @@ library(readxl)
 ### a) Importe o arquivo, apresente o comando utilizado e exiba as seis primeiras observações.
 
 ```{R}
-dados <- read_excel("Projeto_R/Dados/TabelaBussabMorettin.xlsx")
+dados <- read_excel("Dados/TabelaBussabMorettin.xlsx")
 
 head(dados, 6)
 ```

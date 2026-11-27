@@ -1,0 +1,716 @@
+---
+title: "Aula: Introdução ao R Probabilidade no R"
+author: "Renata Mendonça - IME/UFG"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+# Tutorial Básico de R
+
+### Sugestão de pesquisa: <https://www.est.ufmg.br/~monitoria/Material/ApostilaR/IntroducaoR1.html>
+
+- 
+
+  1.  Introdução ao R: R é uma linguagem de programação poderosa usada principalmente para análise estatística e gráficos. Ele é amplamente utilizado em ciência de dados, pesquisa e desenvolvimento, e em muitas outras áreas.
+
+- 
+
+  2.  Instalação Para começar, você precisa instalar o R e, opcionalmente, o RStudio, que é uma interface gráfica mais amigável.
+
+## Operações Básicas
+
+### calculadora simples:
+
+```{r}
+
+2 + 3 # Adição 
+
+4 * 5 # Multiplicação
+
+10 / 2 # Divisão 
+
+5^2 # Exponenciação
+```
+
+### Atribuição de Variáveis Use \<- para atribuir valores a variáveis:
+
+```{r}
+x <- 20 
+
+y <- 10 
+
+z <- x + y # z agora é 15
+
+z
+
+w <- x^2+2*x*z-(y-z)^3
+print(w)
+```
+
+### Vetores
+
+- Um vetor é uma sequência de elementos do mesmo tipo:
+
+```{r}
+vetor <- c(1, 2, 3, 4, 5) # Criando um vetor
+
+print(vetor)
+```
+
+### Operações com vetores
+
+```{r}
+soma_vetor <- sum(vetor) # Soma dos elementos 
+soma_vetor
+media_vetor <- mean(vetor) # Média dos elementos
+media_vetor
+```
+
+### Matrizes
+
+Matrizes são estruturas bidimensionais (linhas e colunas):
+
+```{r}
+# Criando uma matriz 2x3 
+
+matriz <- matrix(1:6, nrow = 2, ncol = 3)
+matriz
+```
+
+### Acessando elementos da matriz
+
+```{r}
+elemento <- matriz[1, 2] # Primeiro elemento da segunda coluna
+elemento
+```
+
+### Data Frames
+
+- Data frames são tabelas, onde cada coluna pode conter diferentes tipos de dados:
+
+```{r}
+# Criando um data frame 
+dados <- data.frame( Nome = c("Eduarda", "Bruno", "Emílio", "Patrícia", "Maria Eduarda", "Maria Eduarda Torres", "Andressa", "Vitória", "Henrique","Suellen", "Thaynara","Marcos","Dalton","Júlia","Ana Beatriz", "Ana Beatriz Fernandes","João Neto","Weber"), Idade = c(19, 21, 42,27,20,19,25,23,22,19,19,21,21,19,21,20,21,35), Altura = c(1.67, 1.70, 1.74,1.55,1.65,1.75,1.65,1.70,1.75,1.53,1.56,1.80,1.90,1.65,1.65,1.71,1.69,1.79), Pet=c(1,1,1,0,1,1,1,1,1,1,0,0,1,1,0,0,1,0))
+dados
+```
+
+```{r}
+# contando número de linhas
+n_dados <- nrow(dados)
+n_dados
+```
+
+## Acessando colunas
+
+```{r}
+idades <- dados$Idade # Retorna a coluna 'Idade'
+idades
+media_idade <- mean(dados$Idade)
+media_idade
+```
+
+## Função para cálcular notas dessa turma
+
+```{r}
+notas <- c(5, 6.5, 6.5) # difinindo as notas do sujeito
+
+pesos <- c(4, 5, 6) # os pesos das unidades
+
+media_parcial <- weighted.mean(notas, pesos) # calculando a média ponderada
+
+mean(notas)
+
+cat("A sua média parcial é",media_parcial) # imprimindo o resultado
+```
+
+## Usando função "ifelse"
+
+```{r}
+ifelse (media_parcial >= 6.0, "Aprovado", "Reprovado")
+```
+
+### Exemplo: Calcular a Idade em Anos, Meses e Dias
+
+# Passo 1: Definir a data de nascimento
+
+```{r}
+data_nascimento <- as.Date("1997-05-14") # Substitua com a data de nascimento desejada
+```
+
+### Passo 2: Calcular a diferença em dias entre a data de nascimento e a data atual
+
+```{r}
+data_atual <- Sys.Date()
+diferenca_dias <- as.numeric(difftime(data_atual, data_nascimento, units = "days"))
+```
+
+### Passo 3: Calcular os anos
+
+```{r}
+anos <- floor(diferenca_dias / 365)
+resto_dias <- diferenca_dias %% 365
+```
+
+### Passo 4: Calcular os meses
+
+```{r}
+meses <- floor(resto_dias / 30)
+dias <- resto_dias %% 30
+```
+
+### Exibir o resultado
+
+```{r}
+cat("Idade: ", anos, "anos,", meses, "meses e", dias, "dias\n")
+```
+
+############################################## 
+
+# Tutorial Básico de R para Probabilidade e Estatística
+
+## 1. Arranjos
+
+### Função para calcular arranjos
+
+```{r}
+arranjos <- function(n, k) {
+  return(factorial(n) / factorial(n - k))}
+arranjos
+```
+
+#### Exemplo: Calcular o número de arranjos de 3 elementos de um conjunto de 5 elementos
+
+```{r}
+n <- 5 
+k<- 4
+arranjos_nk <- arranjos(n, k)
+print(paste("Número de arranjos de k elementos de um conjunto de n:", arranjos_nk))
+```
+
+### 2. Arranjos com Repetição
+
+#### Função para calcular arranjos com repetição
+
+```{r}
+arranjos_repeticao <- function(n, k) {
+  return(n^k)
+}
+```
+
+#### Exemplo: Calcular o número de arranjos com repetição para 2 posições e 4 elementos
+
+```{r}
+arranjos_repeticao_nk <- arranjos_repeticao(n, k)
+print(paste("Número de arranjos com repetição para 2 posições e n elementos:", arranjos_repeticao_nk))
+```
+
+### 3. Permutações
+
+#### Função para calcular permutações
+
+```{r}
+permutacoes <- function(n) {
+  return(factorial(n))
+}
+```
+
+# Exemplo: Calcular o número de permutações de 4 elementos
+
+```{r}
+permutacoes_n <- permutacoes(n)
+print(paste("Número de permutações de n elementos:", permutacoes_n))
+```
+
+### 4. Combinações
+
+#### Função para calcular combinações
+
+```{r}
+combinacoes <- function(n, k) {
+  return(factorial(n) / (factorial(k) * factorial(n - k)))
+}
+```
+
+# Exemplo: Calcular o número de combinações de 3 elementos de um conjunto de 5 elementos
+
+```{r}
+combinacoes_nk <- combinacoes(n, k)
+print(paste("Número de combinações de k elementos de um conjunto de n:", combinacoes_nk))
+```
+
+# Probabilidade
+
+## Use a matri dado para fazer o que se pede:
+
+### Q1 - Cálcule a propabilidade de uma pessoa escolhida ao acaso ter mais que 22 anos.
+
+#### Solução:
+
+```{r}
+# A: idade maior que 22 anos
+A <- dados[dados$Idade>22,] 
+A
+```
+
+```{r}
+# Número de elementos de A
+n_A <- nrow(A)
+n_A
+```
+
+```{r}
+# Cálculando P(A)
+p_A <- n_A/n_dados # número de elementos de A sobre o número de elementos total
+p_A
+```
+
+### Q2 - Cálcule a probabilidde de uma pessoa escolhida ao acaso ter menos que 1.70 de altura
+
+```{r}
+# B: altura menor que 1.65
+B <- dados[dados$Altura<1.65,]
+B
+```
+
+```{r}
+n_B <- nrow(B)
+n_B
+```
+
+```{r}
+p_B <- n_B/n_dados
+p_B
+```
+
+### Para casa
+
+### Q3 - Determine a probabilidade de A união B $P(A\cup B)$, sabendo que $P(A\cup B)=P(A)+P(B)-P(A\cap B)$
+
+```{r}
+AiB <- dados[dados$Idade>22 & dados$Altura<1.65,]
+AiB
+```
+
+```{r}
+n_AiB <- nrow(AiB)
+pAiB <- n_AiB/n_dados
+pAiB
+```
+
+```{r}
+pAuB <- p_A + p_B - pAiB
+pAuB
+```
+
+```{r}
+AuB <-dados[dados$Idade>22 | dados$Altura<1.65,]
+AuB
+```
+
+```{r}
+nAuB <-nrow(AuB)
+p_AuB<-nAuB/n_dados
+p_AuB
+```
+
+```{r}
+pA1 <- 2/3
+
+dados1 <- data.frame(A1=c(10,20),A2=c(8,22),A3=c(12,18))
+dados1
+```
+
+```{r}
+dados2<-data.frame(H=c(10,8,12),M=c(20,22,18))
+dados2
+```
+
+===============================================================================
+
+### Exercícios de Fixação - Introdução ao R e Probabilidade
+
+**Probabilidade e Estatística — Engenharia de Software e Sistemas de Informação**\
+**Objetivo:** praticar os comandos básicos do R, criação e manipulação de vetores, matrizes e *data frames*, além de utilizar o R para resolver problemas elementares de probabilidade. Ao final, a atividade deverá ser organizada em um documento R Markdown e convertida para PDF.
+
+### 1.
+
+Utilize o R como uma calculadora para determinar o valor das expressões abaixo. Para cada item, escreva a expressão em um *chunk* e deixe o R apresentar o resultado.
+
+a)  $15+8\times3$
+
+```{R}
+   15 + (8 * 3)
+```
+
+b)  $\dfrac{25-7}{3}$
+
+```{R}
+(25 - 7) /3
+```
+
+c)  $4^3+\sqrt{81}$
+
+```{R}
+4^3 + sqrt(81)
+```
+
+d)  $\sqrt{144}+2(5^2)-10$
+
+```{R}
+
+sqrt(144) + 2 *(5^2) - 10
+
+```
+
+e)  $\dfrac{3^4-5^2}{7}$
+
+```{R}
+(3^4 - 5^2) / 7
+
+
+```
+
+Em seguida, atribua os valores $x=4$, $y=-2$ e $z=3$ e utilize os objetos `x`, `y` e `z` para calcular
+
+
+$$
+w=x^2+2xy-z^3.
+$$
+
+
+```{R}
+x = 4
+y = -2
+z = 3
+
+w = x^2 + 2*x*y - z^3
+
+w
+
+```
+
+
+### 2.
+
+Crie no R o vetor
+
+``` r
+notas <- c(7.5, 6.0, 8.5, 9.0, 5.5, 7.0, 8.0, 6.5)
+```
+
+``` {R}
+notas <- c(7.5, 6.0, 8.5, 9.0, 5.5, 7.0, 8.0, 6.5)
+```
+
+Utilizando comandos do R, determine:
+
+a)  o número de elementos do vetor;
+```{R}
+length(notas)
+
+```
+
+b)  a terceira nota;
+```{R}
+notas[3]
+
+```
+c)  a soma das notas;
+
+```{R}
+
+sum(notas)
+
+```
+
+d)  a média das notas;
+
+```{R}
+mean(notas)
+```
+
+e)  a maior e a menor nota;
+```{R}
+min(notas)
+max(notas)
+```
+
+f)  quantas notas são maiores ou iguais a 7,0;
+```{R}
+upper7 <- notas[notas>=7]
+length(upper7)
+
+```
+
+g)  a proporção de notas maiores ou iguais a 7,0.
+
+```{R}
+
+proporção <- length(upper7)/length(notas)
+proporção
+
+```
+
+**Observação:** procure utilizar funções como `length()`, `sum()`, `mean()`, `max()` e `min()`.
+
+### 3. Construindo uma matriz
+
+Considere os números de acessos a três sistemas (`A`, `B` e `C`) em três períodos:
+
+$$
+\begin{array}{c|ccc}
+ & A&B&C\\ \hline
+1&12&18&15\\
+2&20&16&22\\
+3&25&21&24
+\end{array}
+$$
+
+a)  Construa essa matriz no R utilizando `matrix()`.
+
+```{R}
+
+matriz <- matrix(c(12,20,25,18,16,21,15,22,24),nrow = 3, ncol = 3)
+matriz
+
+```
+
+b)  Exiba o elemento da segunda linha e terceira coluna.
+
+```{R}
+
+matriz[2,3]
+
+```
+
+c)  Calcule a soma de todos os elementos da matriz.
+
+```{R}
+sum(matriz)
+
+```
+
+d)  Utilize `dim()` para descobrir suas dimensões.
+
+```{R}
+dim(matriz)
+
+```
+
+e)  Calcule a média de todos os valores armazenados na matriz.
+```{R}
+mean(matriz)
+```
+
+### 4. Construindo uma tabela de dados
+
+Crie um `data.frame` denominado `alunos` contendo os dados:
+
+| Aluno    | Idade | Nota | Estuda_R |
+|----------|------:|-----:|---------:|
+| Ana      |    19 |  8.0 |        1 |
+| Bruno    |    22 |  6.5 |        0 |
+| Carlos   |    20 |  7.5 |        1 |
+| Daniela  |    21 |  9.0 |        1 |
+| Eduardo  |    23 |  5.5 |        0 |
+| Fernanda |    20 |  8.5 |        1 |
+| Gabriel  |    24 |  7.0 |        0 |
+| Helena   |    19 |  9.5 |        1 |
+
+```{R}
+alunos <- data.frame(
+
+Aluno = c("Ana","Bruno","Carlos","Daniela","Eduardo", "Fernanda", "Gabriel", "Helena"),
+
+Idade = c(19,22,20,21,23,20,24,19),
+
+Nota = c(8.0,6.5,7.5,9.0,5.5,8.5,7.0,9.5),
+
+Estuda_R = c(1,0,1,1,0,1,0,1)
+
+)
+```
+
+Depois de construir o *data frame*:
+
+a)  exiba a tabela completa;
+
+```{R}
+alunos
+```
+
+b)  utilize `str()` para verificar sua estrutura;
+
+```{R}
+
+str(alunos)
+
+```
+
+c)  determine o número de linhas e de colunas;
+
+```{R}
+
+dim(alunos)
+
+```
+
+d)  extraia apenas a coluna `Nota`;
+
+```{R}
+
+alunos["Nota"]
+
+```
+
+e)  calcule a média das notas;
+
+```{R}
+
+mean(notas$Nota)
+
+```
+
+f)  selecione somente os alunos com nota maior ou igual a 7;
+
+```{R}
+
+alunos[alunos$Nota >=7,]
+
+```
+
+g)  selecione somente os alunos com idade maior que 20 anos.
+
+```{R}
+
+alunos[alunos$Idade>20,]
+
+```
+
+*Esses comandos reproduzem o tipo de manipulação feita na aula com `dados$Idade` e condições dentro de `dados[ , ]`.*
+
+### 5. Construindo uma tabela de frequências
+
+Ainda utilizando o objeto `alunos`, considere a variável `Estuda_R`, em que:
+
+- `1` = já havia estudado R anteriormente;
+- `0` = nunca havia estudado R.
+
+a)  Utilize o comando
+
+``` r
+table(alunos$Estuda_R)
+```
+
+``` {R}
+table(alunos$Estuda_R)
+```
+
+e interprete o resultado.
+
+b)  Utilize
+
+``` r
+prop.table(table(alunos$Estuda_R))
+```
+
+``` {R}
+prop.table(table(alunos$Estuda_R))
+```
+
+para obter as frequências relativas.
+
+c)  Qual é a proporção de alunos que já havia estudado R?
+
+```{R}
+
+0.625
+
+```
+
+d)  Multiplique o resultado do item anterior por 100 e apresente-o como porcentagem.
+
+```{R}
+
+round(100 * 0.625,0)
+
+```
+
+### 6. R e Probabilidade
+
+Considere que um dos oito alunos do *data frame* `alunos` seja selecionado aleatoriamente.
+
+Defina os eventos:
+
+$$
+A=\{\text{o aluno possui nota maior ou igual a 7}\}
+$$
+
+e
+
+$$
+B=\{\text{o aluno possui idade maior que 20 anos}\}.
+$$
+
+Utilizando o R:
+
+a)  construa um novo *data frame* contendo somente os elementos de $A$;
+
+b)  determine $n(A)$ e calcule $P(A)$;
+
+c)  construa um novo *data frame* contendo somente os elementos de $B$;
+
+d)  determine $n(B)$ e calcule $P(B)$;
+
+e)  determine os alunos pertencentes a $A\cap B$ e calcule $P(A\cap B)$;
+
+f)  utilizando
+
+$$
+P(A\cup B)=P(A)+P(B)-P(A\cap B),
+$$
+
+calcule $P(A\cup B)$;
+
+g)  utilize agora o operador `|` do R para selecionar diretamente os elementos de $A\cup B$. Compare o resultado com o item anterior.
+
+### 7. Contagem e probabilidade
+
+Uma senha é formada por **3 algarismos distintos**, escolhidos entre os algarismos de 0 a 9.
+
+a)  Crie no R uma função para calcular o número de arranjos de $n$ elementos tomados $k$ a $k$.
+
+b)  Utilize sua função para determinar quantas senhas podem ser formadas.
+
+c)  Quantas dessas senhas começam pelo algarismo 5?
+
+d)  Se uma das senhas possíveis for escolhida ao acaso, qual é a probabilidade de ela começar por 5?
+
+### 8. Construindo seu primeiro relatório em R Markdown
+
+Crie um novo documento no RStudio utilizando:
+
+**File → New File → R Markdown**
+
+No documento:
+
+1.  coloque como título **“Lista de Exercícios — Introdução ao R e Probabilidade”**;
+2.  informe seu nome;
+3.  crie uma seção para cada exercício usando títulos como `## Exercício 1`;
+4.  escreva as respostas explicativas como **texto normal**;
+5.  coloque os comandos do R dentro de *chunks*;
+6.  faça com que os resultados dos comandos apareçam no documento;
+7.  escreva pelo menos uma expressão matemática utilizando a sintaxe do R Markdown, por exemplo:
+
+``` text
+$P(A)=\frac{n(A)}{n(\Omega)}$
+```
+
+8.  salve o arquivo com a extensão `.Rmd`;
+9.  gere a versão final em **PDF** utilizando o botão **Knit**.
+
+**Gere** **dois arquivos**: o arquivo-fonte `.Rmd` e o relatório final `.pdf`.
+
+------------------------------------------------------------------------
+
+#Fim!!!
